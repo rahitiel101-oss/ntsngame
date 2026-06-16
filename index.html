@@ -182,7 +182,7 @@ function setBg(scene){
   if(scene==="principal")bg.style.backgroundImage="url("+BG_P+")";
   else if(scene==="workshop")bg.style.backgroundImage="url("+BG_W+")";
   else if(scene==="search")bg.style.backgroundImage="url("+BG_GUN+")";
-  else if(scene==="search_container")bg.style.backgroundImage="url("+BG_CS+")";
+  else if(scene==="search_container")bg.style.backgroundImage="url("+BG_CT+")";
   else if(scene==="warehouse_front")bg.style.backgroundImage="url("+BG_WF+")";
   else if(scene==="warehouse_inside")bg.style.backgroundImage="url("+BG_WI+")";
   else if(scene==="smartphone")bg.style.backgroundImage="url("+BG_SP+")";
@@ -199,9 +199,9 @@ function drawChars(i){
     var id=s.chars[j];
     var active=s.speaker===CL[id];
     if(id==="natsuki"){
-      drawCharImg(NATSUKI_IMG, dialogTop, titleBottom, w, h, active);
+      drawCharImg(NATSUKI_IMG, dialogTop, titleBottom, w, h, active, w*0.32);
     } else if(id==="shin"){
-      drawCharImg(SHIN_IMG, dialogTop, titleBottom, w, h, active);
+      drawCharImg(SHIN_IMG, dialogTop, titleBottom, w, h, active, w*0.68);
     } else {
       drawSil(w/2,dialogTop,titleBottom,w,h,active);
     }
@@ -209,7 +209,7 @@ function drawChars(i){
 }
 
 var _imgCache={};
-function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active){
+function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   var img=_imgCache[imgUrl];
   if(!img){
     img=new Image();
@@ -219,23 +219,20 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active){
     return;
   }
   if(!img.complete||!img.naturalWidth) return;
+  if(cx===undefined) cx=w/2;
   ctx.save();
   ctx.globalAlpha=active?0.95:0.35;
   var imgAspect=img.naturalWidth/img.naturalHeight;
-  // 画像下端をダイアログ上端にぴったり合わせる
-  // 高さはdrawSilと同じ基準(w*0.52)で、腰位置(68%)がdialogTopに来るよう設定
-  var fh=w*0.52;
-  var drawH=fh/0.68; // 腰がdialogTopになるよう全体を伸ばす
+  // 高さを画面の55%に制限して顔が見えるサイズに
+  var drawH=h*0.55;
   var drawW=drawH*imgAspect;
-  if(drawW>w*0.75){drawW=w*0.75;drawH=drawW/imgAspect;}
-  var drawX=w/2-drawW/2;
-  var drawY=dialogTop-fh; // 腰(fh位置)をdialogTopに合わせ、上部がはみ出す形
-  // 頭がtitleBottomより上に出たらクランプ
-  if(drawY<titleBottom){drawY=titleBottom;}
+  if(drawW>w*0.40){drawW=w*0.40;drawH=drawW/imgAspect;}
+  // 下端をダイアログ上端に合わせる
+  var drawX=cx-drawW/2;
+  var drawY=dialogTop-drawH;
   ctx.drawImage(img,drawX,drawY,drawW,drawH);
   ctx.restore();
 }
-
 function drawSil(ox,bot,minTop,w,h,active){
   ctx.save();ctx.fillStyle="#080808";ctx.globalAlpha=active?0.88:0.35;
   var fh=w*0.52,fw=fh*0.38,ft=bot-fh*0.68;
