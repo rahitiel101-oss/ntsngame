@@ -179,13 +179,22 @@ function setBg(scene){
   if(scene===curScene)return;curScene=scene;
   var isSearch=(scene==="search"||scene==="search_container");
   bg.className=isSearch?"search":"";
+  // デフォルトリセット
+  bg.style.backgroundSize="cover";
+  bg.style.backgroundRepeat="no-repeat";
+  bg.style.backgroundColor="";
   if(scene==="principal")bg.style.backgroundImage="url("+BG_P+")";
   else if(scene==="workshop")bg.style.backgroundImage="url("+BG_W+")";
   else if(scene==="search")bg.style.backgroundImage="url("+BG_GUN+")";
   else if(scene==="search_container")bg.style.backgroundImage="url("+BG_CT+")";
   else if(scene==="warehouse_front")bg.style.backgroundImage="url("+BG_WF+")";
   else if(scene==="warehouse_inside")bg.style.backgroundImage="url("+BG_WI+")";
-  else if(scene==="smartphone")bg.style.backgroundImage="url("+BG_SP+")";
+  else if(scene==="smartphone"){
+    bg.style.backgroundImage="url("+BG_SP+")";
+    bg.style.backgroundSize="cover";
+    bg.style.backgroundPosition="center";
+    bg.style.backgroundColor="#000";
+  }
   else{bg.style.backgroundImage="none";bg.style.backgroundColor="#000";}
   bg.style.backgroundColor=isSearch?"#111":"";
 }
@@ -223,11 +232,13 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   ctx.save();
   ctx.globalAlpha=active?0.95:0.35;
   var imgAspect=img.naturalWidth/img.naturalHeight;
-  // 高さを画面の55%に制限して顔が見えるサイズに
-  var drawH=h*0.55;
-  var drawW=drawH*imgAspect;
-  if(drawW>w*0.40){drawW=w*0.40;drawH=drawW/imgAspect;}
-  // 下端をダイアログ上端に合わせる
+  // 幅を画面の38%に制限
+  var drawW=w*0.38;
+  var drawH=drawW/imgAspect;
+  // 高さがセリフウィンドウより大きくなりすぎたらクランプ
+  var maxH=dialogTop-titleBottom;
+  if(drawH>maxH){drawH=maxH;drawW=drawH*imgAspect;}
+  // 下端をダイアログ上端にぴったり合わせる
   var drawX=cx-drawW/2;
   var drawY=dialogTop-drawH;
   ctx.drawImage(img,drawX,drawY,drawW,drawH);
@@ -317,12 +328,15 @@ function go(i){
   var s=currentSC[i];
   if(!s)return;
 
-  // フルスクリーン画像（スマートフォン等）
+  // フルスクリーン画像（スマートフォン等）- 背景に大きく表示、セリフウィンドウあり
   if(s.fullscreen){
     setBg(s.scene);
-    db.style.display="none";cc.style.display="none";
+    db.style.display="";  // セリフウィンドウは表示
+    cc.style.display="none";  // キャラは非表示
     sc.classList.add("h");
     searchHint.style.display="none";
+    nt.classList.add("h");
+    dt.textContent="";
     if(ov.classList.contains("f")){setTimeout(function(){ov.classList.remove("f");},50);}
     return;
   }
@@ -334,12 +348,15 @@ function go(i){
     return;
   }
 
-  // フルスクリーン画像（スマートフォン等）
+  // フルスクリーン画像（スマートフォン等）- 背景に大きく表示、セリフウィンドウあり
   if(s.fullscreen){
     setBg(s.scene);
-    db.style.display="none";cc.style.display="none";
+    db.style.display="";  // セリフウィンドウは表示
+    cc.style.display="none";  // キャラは非表示
     sc.classList.add("h");
     searchHint.style.display="none";
+    nt.classList.add("h");
+    dt.textContent="";
     if(ov.classList.contains("f")){setTimeout(function(){ov.classList.remove("f");},50);}
     return;
   }
