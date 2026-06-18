@@ -257,13 +257,13 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   ctx.save();
   ctx.globalAlpha=active?0.95:0.35;
   var imgAspect=img.naturalWidth/img.naturalHeight;
-  // 幅を画面の48%に設定
-  var drawW=w*0.48;
+  // 幅を画面の62%に拡大（教頭シルエットと同程度のサイズ感）
+  var drawW=w*0.62;
   var drawH=drawW/imgAspect;
-  // 画像の上端がtitleBottomを下回らないようにクランプ
+  // 上端クランプ
   if(drawH>dialogTop-titleBottom){drawH=dialogTop-titleBottom;drawW=drawH*imgAspect;}
   var drawX=cx-drawW/2;
-  // 下端をdialogTopより少し下に沈める（腰あたりがウィンドウに重なる）
+  // 下端をdialogTopより30%沈める
   var sink=drawH*0.30;
   var drawY=dialogTop-drawH+sink;
   ctx.drawImage(img,drawX,drawY,drawW,drawH);
@@ -271,7 +271,7 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
 }
 function drawSil(ox,bot,minTop,w,h,active){
   ctx.save();ctx.fillStyle="#080808";ctx.globalAlpha=active?0.88:0.35;
-  var fh=w*0.52,fw=fh*0.38,ft=bot-fh*0.68;
+  var fh=w*0.65,fw=fh*0.38,ft=bot-fh*0.68;
   if(ft<minTop)ft=minTop;
   var hh=fh*0.17,hcy=ft+hh*0.52;
   ctx.beginPath();ctx.ellipse(ox,hcy,fw*0.25,hh/2,0,0,Math.PI*2);ctx.fill();
@@ -465,7 +465,7 @@ function go(i){
   db.style.display="";cc.style.display="";
   searchHint.style.display="none";
   searchSplash.classList.remove("show");
-  if(s.title){sc.textContent=s.title;sc.classList.remove("h");}else{sc.classList.add("h");}
+  if(s.title){sc.textContent=s.title.replace(/^\u25a0\s*/,"");sc.classList.remove("h");}else{sc.classList.add("h");}
   if(s.speaker){
     var c=NC[s.speaker]||{b:"#2a2040",t:"#e0d8f0"};
     nt.textContent=s.speaker;nt.style.background=c.b;nt.style.color=c.t;
@@ -483,27 +483,26 @@ function show(i){
   var s=currentSC[i],prev=i>0?currentSC[i-1].scene:null;
   if(s.blackout){
     ov.classList.add("f");
-    if(s.nextTitle){
-      // 暗転中に場所名を中央表示
+    blockTap=true;
+    setTimeout(function(){
+      // 黒画面でナレーション表示（セリフウィンドウ）
+      setBg("black");
+      db.style.display="";
+      cc.style.display="none";
+      sc.classList.add("h");
+      nt.classList.add("h");
+      dt.textContent=s.text||"";
+      ov.classList.remove("f");
       setTimeout(function(){
-        ov.classList.remove("f");
-        blockTap=true;
-        var el=document.getElementById("scene-intro");
-        el.textContent=s.nextTitle;
-        el.style.opacity="1";
-        setTimeout(function(){
-          el.style.transition="opacity 0.8s";
-          el.style.opacity="0";
-          setTimeout(function(){
-            el.style.transition="";
-            blockTap=false;
-            step++;show(step);
-          },800);
-        },1200);
-      },700);
-    } else {
-      setTimeout(function(){step++;show(step);},1400);
-    }
+        // 場所名があれば表示してから次へ
+        if(s.nextTitle){
+          showSceneIntro(s.nextTitle.replace(/^■\s*/,""), function(){ blockTap=false; step++;show(step); });
+        } else {
+          blockTap=false;
+          step++;show(step);
+        }
+      },1400);
+    },700);
     return;
   }
   // 場所名表示の条件：
@@ -515,17 +514,19 @@ function show(i){
   var toSmartphone = (s.scene==="smartphone"||s.fullscreen);
   var shouldIntro = s.showIntro && !prevIsSpecial && !toSmartphone;
   if(shouldIntro){
-    // シーン切り替わり：背景だけ見せて場所名を中央表示
-    ov.classList.add("f");
-    setTimeout(function(){
-      setBg(s.scene);
-      db.style.display="none";
-      cc.style.display="none";
-      sc.classList.add("h");
-      searchHint.style.display="none";
-      showSceneIntro(s.title, function(){ go(i); });
-      ov.classList.remove("f");
-    },700);
+    // 背景をすぐ表示、人物・セリフなしで場所名だけ1秒表示してからgo()
+    blockTap=true;
+    setBg(s.scene);
+    db.style.display="none";
+    cc.style.display="none";
+    sc.classList.add("h");
+    searchHint.style.display="none";
+    if(ov.classList.contains("f")){ov.classList.remove("f");}
+    var introTitle=s.title.replace(/^■\s*/,"");
+    showSceneIntro(introTitle, function(){
+      // 表示終了後にセリフ・人物を含むgo()へ
+      go(i);
+    });
   } else if(prev&&prev!==s.scene&&!s.search&&!s.choice&&!prevIsSpecial&&!toSmartphone){
     ov.classList.add("f");
     setTimeout(function(){go(i);},700);
@@ -534,19 +535,20 @@ function show(i){
 
 function showSceneIntro(title, callback){
   var el=document.getElementById("scene-intro");
-  el.textContent=title;
+  el.textContent=title.replace(/^■\s*/,"");
   el.style.opacity="1";
+  // blockTapは呼び出し元で設定済みの場合もあるので保証
   blockTap=true;
   setTimeout(function(){
-    el.style.transition="opacity 0.8s";
+    el.style.transition="opacity 0.6s";
     el.style.opacity="0";
     setTimeout(function(){
       el.style.transition="";
       el.style.opacity="0";
       blockTap=false;
       callback();
-    },800);
-  },1200);
+    },600);
+  },1000);
 }
 
 function showBang(){
