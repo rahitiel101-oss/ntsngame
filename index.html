@@ -486,23 +486,29 @@ function show(i){
     ov.classList.add("f");
     blockTap=true;
     setTimeout(function(){
-      // 黒画面でナレーション表示（セリフウィンドウ）
+      // 暗転：黒画面でナレーションのみ（セリフウィンドウあり、背景なし）
       setBg("black");
-      db.style.display="";
+      db.style.display= s.text ? "" : "none";
       cc.style.display="none";
       sc.classList.add("h");
       nt.classList.add("h");
       dt.textContent=s.text||"";
       ov.classList.remove("f");
+      var delay = s.text ? 1400 : 600;
       setTimeout(function(){
-        // 場所名があれば表示してから次へ
         if(s.nextTitle){
+          // 次のシーンの背景画像に切り替えてから場所名表示
+          var nextSc=currentSC[step+1];
+          if(nextSc) setBg(nextSc.scene);
+          db.style.display="none";
+          cc.style.display="none";
+          sc.classList.add("h");
           showSceneIntro(s.nextTitle.replace(/^■\s*/,""), function(){ blockTap=false; step++;show(step); });
         } else {
           blockTap=false;
           step++;show(step);
         }
-      },1400);
+      },delay);
     },700);
     return;
   }
