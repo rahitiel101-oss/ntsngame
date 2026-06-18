@@ -511,7 +511,9 @@ function show(i){
   // ・前のシーンがsearch/search_container/blackout/smartphone/fullscreenでない
   // ・現在のステップにshowIntroフラグがある
   var prevIsSpecial = (prev==="search"||prev==="search_container"||prev==="black"||prev==="smartphone");
-  var shouldIntro = s.showIntro && !prevIsSpecial;
+  // smartphone/fullscreenシーンへの遷移はフェードなし
+  var toSmartphone = (s.scene==="smartphone"||s.fullscreen);
+  var shouldIntro = s.showIntro && !prevIsSpecial && !toSmartphone;
   if(shouldIntro){
     // シーン切り替わり：背景だけ見せて場所名を中央表示
     ov.classList.add("f");
@@ -524,7 +526,7 @@ function show(i){
       showSceneIntro(s.title, function(){ go(i); });
       ov.classList.remove("f");
     },700);
-  } else if(prev&&prev!==s.scene&&!s.search&&!s.choice&&!prevIsSpecial){
+  } else if(prev&&prev!==s.scene&&!s.search&&!s.choice&&!prevIsSpecial&&!toSmartphone){
     ov.classList.add("f");
     setTimeout(function(){go(i);},700);
   } else {go(i);}
