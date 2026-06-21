@@ -575,7 +575,7 @@ function go(i){
   db.style.display="";cc.style.display="";
   searchHint.style.display="none";
   searchSplash.classList.remove("show");
-  if(s.title){sc.textContent=s.title.replace(/^\u25a0\s*/,"");sc.classList.remove("h");}else{sc.classList.add("h");}
+  sc.classList.add("h"); // 場所タグ常時非表示
   if(s.speaker){
     var c=NC[s.speaker]||{b:"#2a2040",t:"#e0d8f0"};
     nt.textContent=s.speaker;nt.style.background=c.b;nt.style.color=c.t;
