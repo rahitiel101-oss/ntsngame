@@ -693,24 +693,24 @@ function showBang(){
   var btn=document.getElementById("hist-btn");
   var overlay=document.getElementById("hist-overlay");
   var closeBtn=document.getElementById("hist-close");
-  var tapped=false;
 
   function openHist(e){
     e.stopPropagation();
-    if(tapped)return; tapped=true;
-    setTimeout(function(){tapped=false;},400);
+    e.preventDefault();
     renderHist();
     overlay.classList.add("show");
   }
   function closeHist(e){
     e.stopPropagation();
+    e.preventDefault();
     overlay.classList.remove("show");
   }
 
-  btn.addEventListener("touchstart", openHist, {passive:false});
-  btn.addEventListener("click", openHist);
-  closeBtn.addEventListener("touchstart", closeHist, {passive:false});
-  closeBtn.addEventListener("click", closeHist);
+  // touchendのみ使用（clickは発火しない）
+  btn.addEventListener("touchend", openHist, {passive:false});
+  btn.addEventListener("click", function(e){e.stopPropagation();renderHist();overlay.classList.add("show");});
+  closeBtn.addEventListener("touchend", closeHist, {passive:false});
+  closeBtn.addEventListener("click", function(e){e.stopPropagation();overlay.classList.remove("show");});
 })();
 
 function handleTap(){
