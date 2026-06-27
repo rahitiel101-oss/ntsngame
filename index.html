@@ -198,19 +198,19 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
         <feTurbulence type="fractalNoise" baseFrequency="0.018 0.022" numOctaves="4" seed="3" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="28" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
         <feGaussianBlur in="displaced" stdDeviation="8" result="blurred"/>
-        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.55 0"/>
+        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.28 0"/>
       </filter>
       <filter id="f-moya2" x="-40%" y="-40%" width="180%" height="180%">
         <feTurbulence type="fractalNoise" baseFrequency="0.025 0.015" numOctaves="3" seed="9" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="G" yChannelSelector="R" result="displaced"/>
         <feGaussianBlur in="displaced" stdDeviation="12" result="blurred"/>
-        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.40 0"/>
+        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.18 0"/>
       </filter>
       <filter id="f-moya3" x="-50%" y="-50%" width="200%" height="200%">
         <feTurbulence type="fractalNoise" baseFrequency="0.012 0.030" numOctaves="5" seed="17" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="B" result="displaced"/>
         <feGaussianBlur in="displaced" stdDeviation="16" result="blurred"/>
-        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.30 0"/>
+        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.12 0"/>
       </filter>
     </defs>
     <!-- もや層（JS側でcx/cy/rxなどを動的に設定） -->
@@ -375,6 +375,7 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
 
 function showMoya(x, y, w, h){
   var svg=document.getElementById("moya-svg");
+  svg.style.display="block";
   svg.classList.add("show");
   var cx=x+w/2, cy=y+h*0.45;
   var rx1=w*0.55, ry1=h*0.55;
@@ -389,11 +390,9 @@ function showMoya(x, y, w, h){
 }
 
 function hideMoya(){
-  document.getElementById("moya-svg").classList.remove("show");
-  document.getElementById("moya-svg").style.display="none";
-  setTimeout(function(){
-    document.getElementById("moya-svg").style.display="";
-  },10);
+  var svg=document.getElementById("moya-svg");
+  svg.classList.remove("show");
+  svg.style.display="none";
 }
 function drawSil(ox,bot,minTop,w,h,active){
   ctx.save();ctx.fillStyle="#080808";ctx.globalAlpha=active?0.88:0.35;
@@ -778,20 +777,36 @@ function showSceneIntro(title, callback){
 var _shakeInterval=null;
 function startShake(type){
   stopShake();
-  var amp=type==="big"?8:2;
-  var speed=type==="big"?60:80;
-  var count=0;
-  _shakeInterval=setInterval(function(){
-    var x=(Math.random()-0.5)*amp;
-    var y=(Math.random()-0.5)*amp;
-    vn.style.transform="translate("+x+"px,"+y+"px)";
-    count++;
-    if(type==="big"&&count>12){stopShake();}
-  },speed);
+  if(type==="big"){
+    var amp=8, count=0;
+    _shakeInterval=setInterval(function(){
+      var x=(Math.random()-0.5)*amp;
+      var y=(Math.random()-0.5)*amp;
+      vn.style.transform="translate("+x+"px,"+y+"px)";
+      count++;
+      if(count>12){stopShake();}
+    },60);
+  } else {
+    // small: たまにゆっくり揺れる（2〜4秒に1回、ふわっと動く）
+    _shakeInterval=setInterval(function(){
+      if(Math.random()<0.35){
+        var x=(Math.random()-0.5)*3;
+        var y=(Math.random()-0.5)*2;
+        vn.style.transition="transform 0.6s ease";
+        vn.style.transform="translate("+x+"px,"+y+"px)";
+        setTimeout(function(){
+          vn.style.transition="transform 1.2s ease";
+          vn.style.transform="";
+        },600);
+      }
+    },2000);
+  }
 }
 function stopShake(){
   if(_shakeInterval){clearInterval(_shakeInterval);_shakeInterval=null;}
+  vn.style.transition="transform 0.3s ease";
   vn.style.transform="";
+  setTimeout(function(){vn.style.transition="";},300);
 }
 
 function showBang(){
