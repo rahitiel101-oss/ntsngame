@@ -865,7 +865,7 @@ function go(i){
 
   // BANGエフェクト
   if(s.bang){
-    if(_bangFiredAt!==-1){ step++; show(step); return; }
+    if(_bangFiredAt===i){ step++; show(step); return; }
     _bangFiredAt=i;
     showBang();
     setTimeout(function(){step++;show(step);},1200);
