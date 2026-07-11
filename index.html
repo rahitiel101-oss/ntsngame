@@ -871,7 +871,7 @@ function show(i){
     if(ov.classList.contains("f")){ov.classList.remove("f");}
     var introTitle=s.title.replace(/^■\s*/,"");
     showSceneIntro(introTitle, function(){ go(i); });
-  } else if(prev&&prev!==s.scene&&!s.search&&!s.choice&&!prevIsSpecial&&!toSmartphone&&!isEffect&&!noIntro){
+  } else if(prev&&prev!==s.scene&&!s.search&&!s.choice&&!prevIsSpecial&&!toSmartphone&&!isEffect&&!noIntro&&!s.whiteFlash){
     ov.classList.add("f");
     setTimeout(function(){go(i);},700);
   } else {go(i);}
@@ -991,20 +991,25 @@ function go(i){
     db.style.display="none";cc.style.display="none";
     sc.classList.add("h");searchHint.style.display="none";
     blockTap=true;
+    document.getElementById("screen-dark").classList.remove("on");
+    document.getElementById("red-flash").classList.remove("on");
+    ov.classList.remove("f");
     ovWhite.style.background="#fff3e0"; // 白っぽいオレンジ色のフラッシュ
     ovWhite.classList.add("f");
+    var FADE_IN=1100, HOLD_FLASH=250, FADE_OUT=1100, BG_ALONE=2000;
     setTimeout(function(){
-      setBg(s.scene);
+      setBg(s.scene); // まだフラッシュで覆われている間に背景を切り替える
       setTimeout(function(){
-        ovWhite.classList.remove("f");
+        ovWhite.classList.remove("f"); // ここからフラッシュが消えて背景が見えてくる
         setTimeout(function(){
           blockTap=false;
           s._wfRevealed=true;
           ovWhite.style.background=""; // 他の白フラッシュ演出用に元へ戻す
-          go(i);
-        },2000);
-      },50);
-    },900);
+          step=i+1;
+          if(step<currentSC.length) show(step);
+        }, FADE_OUT + BG_ALONE); // フラッシュが完全に消えてから背景だけを約2秒見せる
+      }, HOLD_FLASH);
+    }, FADE_IN);
     return;
   }
 
