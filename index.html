@@ -175,6 +175,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
   letter-spacing:.3em;
   color:var(--e-title1,#5c7a8c);
   margin-top:3.2vh;
+  text-shadow:0 0 1px var(--e-shadow1,rgba(50,90,110,.5)),0 1px 2px var(--e-shadow2,rgba(40,80,100,.3));
 }
 #credits-block .cr-head:first-child{margin-top:0;}
 #credits-block .cr-body{
@@ -184,7 +185,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
   color:var(--e-txt,#EAF6FF);
   line-height:2;
   margin-top:.6vh;
-  text-shadow:0 0 10px var(--e-glow2,rgba(174,235,255,.5));
+  text-shadow:
+    0 0 1px var(--e-shadow1,rgba(50,90,110,.75)),
+    0 1px 3px var(--e-shadow2,rgba(40,80,100,.5)),
+    0 0 12px var(--e-glow2,rgba(174,235,255,.6));
 }
 #credits-block .cr-sub{
   font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:300;
@@ -192,7 +196,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
   letter-spacing:.1em;
   color:var(--e-title2,#7d97a6);
   line-height:1.9;
+  text-shadow:0 0 1px var(--e-shadow1,rgba(50,90,110,.4)),0 1px 2px var(--e-shadow2,rgba(40,80,100,.25));
 }
+#credits-block.compact .cr-head{font-size:clamp(.75rem,1.6vw,1rem);margin-top:2.2vh;}
+#credits-block.compact .cr-sub{font-size:clamp(.7rem,1.5vw,.9rem);line-height:1.6;}
 #chapter-screen{
   position:absolute;inset:0;
   background:rgba(8,6,18,0.97);
@@ -784,7 +791,7 @@ function showEnding(s){
   titleEl.classList.remove("on");
   el.classList.remove("breathing");
   var creditsElReset=document.getElementById("credits-block");
-  creditsElReset.classList.remove("show");
+  creditsElReset.classList.remove("show","compact");
   creditsElReset.innerHTML="";
 
   el.classList.add("show");
@@ -802,7 +809,7 @@ function showEnding(s){
   setTimeout(function(){ titleEl.classList.add("on"); }, lastSettle + 600);
 
   var creditsEl=document.getElementById("credits-block");
-  var CREDITS_HTML =
+  var CREDITS_PAGE1 =
     '<div class="cr-inner">'+
       '<div class="cr-head">脚本・制作</div>'+
       '<div class="cr-body">toki</div>'+
@@ -810,14 +817,17 @@ function showEnding(s){
       '<div class="cr-body">Claude Code（Anthropic）</div>'+
       '<div class="cr-head">人物イラスト・スチル</div>'+
       '<div class="cr-body">My special friend</div>'+
+    '</div>';
+  var CREDITS_PAGE2 =
+    '<div class="cr-inner">'+
       '<div class="cr-head">背景イラスト</div>'+
-      '<div class="cr-sub" style="margin-top:2.2vh;">AIPICT</div>'+
+      '<div class="cr-sub" style="margin-top:1.6vh;">AIPICT</div>'+
       '<div class="cr-sub">・職員室</div>'+
-      '<div class="cr-sub" style="margin-top:1.8vh;">ゲームまてりあるず</div>'+
+      '<div class="cr-sub" style="margin-top:1.3vh;">ゲームまてりあるず</div>'+
       '<div class="cr-sub">・倉庫の外</div>'+
       '<div class="cr-sub">・倉庫の中</div>'+
       '<div class="cr-sub">・港（In the box）</div>'+
-      '<div class="cr-sub" style="margin-top:1.8vh;">ChatGPT（OpenAI）</div>'+
+      '<div class="cr-sub" style="margin-top:1.3vh;">ChatGPT（OpenAI）</div>'+
       '<div class="cr-sub">・工房</div>'+
       '<div class="cr-sub">・船倉</div>'+
       '<div class="cr-sub">・夜の海</div>'+
@@ -831,27 +841,47 @@ function showEnding(s){
     letters.forEach(function(sp){ sp.classList.remove("on"); });
     titleEl.classList.remove("on");
     setTimeout(function(){
-      // 続けてクレジットをフェードイン
-      creditsEl.innerHTML = CREDITS_HTML;
+      // クレジット1ページ目をフェードイン
+      creditsEl.classList.remove("compact");
+      creditsEl.innerHTML = CREDITS_PAGE1;
       creditsEl.classList.add("show");
       setTimeout(function(){
-        el.addEventListener("click", onCreditsEnd);
-        el.addEventListener("touchend", onCreditsEnd, {passive:true});
+        el.addEventListener("click", onPage1End);
+        el.addEventListener("touchend", onPage1End, {passive:true});
       }, 900);
     }, 1300);
   }
-  function onCreditsEnd(e){
+  function onPage1End(e){
     if(e){e.stopPropagation();}
-    el.removeEventListener("click", onCreditsEnd);
-    el.removeEventListener("touchend", onCreditsEnd);
+    el.removeEventListener("click", onPage1End);
+    el.removeEventListener("touchend", onPage1End);
     creditsEl.classList.remove("show");
     setTimeout(function(){
+      // クレジット2ページ目（背景イラスト、1画面に収まるサイズ）へ切り替え
+      creditsEl.classList.add("compact");
+      creditsEl.innerHTML = CREDITS_PAGE2;
+      creditsEl.classList.add("show");
+      setTimeout(function(){
+        el.addEventListener("click", onPage2End);
+        el.addEventListener("touchend", onPage2End, {passive:true});
+      }, 900);
+    }, 1100);
+  }
+  function onPage2End(e){
+    if(e){e.stopPropagation();}
+    el.removeEventListener("click", onPage2End);
+    el.removeEventListener("touchend", onPage2End);
+    creditsEl.classList.remove("show");
+    setTimeout(function(){
+      creditsEl.innerHTML="";
+      creditsEl.classList.remove("compact");
+      // 先にタイトル画面（不透明）を裏に表示してから、エンディング画面をフェードアウトさせる
+      // ことで、ゲームの背景（例：夜の海）が一瞬見えてしまうのを防ぐ
+      document.getElementById("title-screen").classList.remove("hide");
+      document.getElementById("chapter-screen").classList.remove("show");
       el.classList.remove("show","breathing");
       vig.classList.remove("show");
-      creditsEl.innerHTML="";
       setTimeout(function(){
-        document.getElementById("title-screen").classList.remove("hide");
-        document.getElementById("chapter-screen").classList.remove("show");
         blockTap=false;
       }, 1300);
     }, 1100);
