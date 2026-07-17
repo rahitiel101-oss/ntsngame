@@ -158,6 +158,41 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 #ending-title.on{opacity:1;}
 #ending-title .l1{font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:400;font-size:clamp(1.1rem,2.6vw,1.9rem);letter-spacing:.32em;color:var(--e-title1,#5c7a8c);}
 #ending-title .l2{margin-top:.9vh;font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:300;font-size:clamp(.95rem,2.1vw,1.55rem);letter-spacing:.28em;color:var(--e-title2,#7d97a6);}
+#credits-block{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 1.1s ease;
+  padding:4vh 6vw;
+  overflow-y:auto;
+  text-align:center;
+}
+#credits-block.show{opacity:1;pointer-events:auto;}
+#credits-block .cr-inner{margin:auto;}
+#credits-block .cr-head{
+  font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:500;
+  font-size:clamp(.85rem,1.9vw,1.15rem);
+  letter-spacing:.3em;
+  color:var(--e-title1,#5c7a8c);
+  margin-top:3.2vh;
+}
+#credits-block .cr-head:first-child{margin-top:0;}
+#credits-block .cr-body{
+  font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:300;
+  font-size:clamp(.95rem,2.2vw,1.4rem);
+  letter-spacing:.12em;
+  color:var(--e-txt,#EAF6FF);
+  line-height:2;
+  margin-top:.6vh;
+  text-shadow:0 0 10px var(--e-glow2,rgba(174,235,255,.5));
+}
+#credits-block .cr-sub{
+  font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:300;
+  font-size:clamp(.8rem,1.8vw,1.05rem);
+  letter-spacing:.1em;
+  color:var(--e-title2,#7d97a6);
+  line-height:1.9;
+}
 #chapter-screen{
   position:absolute;inset:0;
   background:rgba(8,6,18,0.97);
@@ -316,6 +351,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
     <div id="ending-vignette"></div>
     <div id="ending-text"></div>
     <div id="ending-title"><div class="l1">NTSN DAYS</div><div class="l2">Close Range</div></div>
+    <div id="credits-block"></div>
   </div>
   <div id="title-screen">
     <div id="title-game-name">NTSN DAYS</div>
@@ -747,6 +783,9 @@ function showEnding(s){
   vig.classList.remove("show");
   titleEl.classList.remove("on");
   el.classList.remove("breathing");
+  var creditsElReset=document.getElementById("credits-block");
+  creditsElReset.classList.remove("show");
+  creditsElReset.innerHTML="";
 
   el.classList.add("show");
   requestAnimationFrame(function(){ vig.classList.add("show"); });
@@ -762,18 +801,60 @@ function showEnding(s){
   var lastSettle = lettersStart + (letters.length-1)*STAGGER + LETTER_DUR;
   setTimeout(function(){ titleEl.classList.add("on"); }, lastSettle + 600);
 
+  var creditsEl=document.getElementById("credits-block");
+  var CREDITS_HTML =
+    '<div class="cr-inner">'+
+      '<div class="cr-head">脚本・制作</div>'+
+      '<div class="cr-body">toki</div>'+
+      '<div class="cr-head">プログラミング</div>'+
+      '<div class="cr-body">Claude Code（Anthropic）</div>'+
+      '<div class="cr-head">人物イラスト・スチル</div>'+
+      '<div class="cr-body">My special friend</div>'+
+      '<div class="cr-head">背景イラスト</div>'+
+      '<div class="cr-sub" style="margin-top:2.2vh;">AIPICT</div>'+
+      '<div class="cr-sub">・職員室</div>'+
+      '<div class="cr-sub" style="margin-top:1.8vh;">ゲームまてりあるず</div>'+
+      '<div class="cr-sub">・倉庫の外</div>'+
+      '<div class="cr-sub">・倉庫の中</div>'+
+      '<div class="cr-sub">・港（In the box）</div>'+
+      '<div class="cr-sub" style="margin-top:1.8vh;">ChatGPT（OpenAI）</div>'+
+      '<div class="cr-sub">・工房</div>'+
+      '<div class="cr-sub">・船倉</div>'+
+      '<div class="cr-sub">・夜の海</div>'+
+    '</div>';
+
   function onEnd(e){
     if(e){e.stopPropagation();}
     el.removeEventListener("click", onEnd);
     el.removeEventListener("touchend", onEnd);
-    el.classList.remove("show","breathing");
-    vig.classList.remove("show");
+    // HAPPY END／タイトル文字をフェードアウトさせる
+    letters.forEach(function(sp){ sp.classList.remove("on"); });
     titleEl.classList.remove("on");
     setTimeout(function(){
-      document.getElementById("title-screen").classList.remove("hide");
-      document.getElementById("chapter-screen").classList.remove("show");
-      blockTap=false;
+      // 続けてクレジットをフェードイン
+      creditsEl.innerHTML = CREDITS_HTML;
+      creditsEl.classList.add("show");
+      setTimeout(function(){
+        el.addEventListener("click", onCreditsEnd);
+        el.addEventListener("touchend", onCreditsEnd, {passive:true});
+      }, 900);
     }, 1300);
+  }
+  function onCreditsEnd(e){
+    if(e){e.stopPropagation();}
+    el.removeEventListener("click", onCreditsEnd);
+    el.removeEventListener("touchend", onCreditsEnd);
+    creditsEl.classList.remove("show");
+    setTimeout(function(){
+      el.classList.remove("show","breathing");
+      vig.classList.remove("show");
+      creditsEl.innerHTML="";
+      setTimeout(function(){
+        document.getElementById("title-screen").classList.remove("hide");
+        document.getElementById("chapter-screen").classList.remove("show");
+        blockTap=false;
+      }, 1300);
+    }, 1100);
   }
   setTimeout(function(){
     el.addEventListener("click", onEnd);
