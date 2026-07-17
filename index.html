@@ -113,7 +113,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 /* タイトル画面 */
 #title-screen{
   position:absolute;inset:0;
-  background:linear-gradient(to bottom right, rgba(8,6,15,0.8), rgba(8,6,15,1));
+  background:linear-gradient(to bottom right, rgba(8,6,15,0.45), rgba(8,6,15,0.8));
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   z-index:30;
 }
@@ -212,7 +212,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 #credits-block .cr-note:not(:first-child){margin-top:2.4vh;}
 #chapter-screen{
   position:absolute;inset:0;
-  background:linear-gradient(to bottom right, rgba(8,6,15,0.8), rgba(8,6,15,1));
+  background:linear-gradient(to bottom right, rgba(8,6,15,0.45), rgba(8,6,15,0.8));
   display:none;flex-direction:column;align-items:center;justify-content:flex-start;
   z-index:30;overflow-y:auto;
   padding:4vh 0 4vh;
@@ -297,21 +297,31 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 }
 #opening-card.show{display:flex;}
 #opening-card #opening-text{
-  opacity:0;
-  transition:opacity 0.8s ease;
   display:flex;flex-direction:column;align-items:center;
 }
-#opening-card #opening-text.on{opacity:1;}
 #opening-card .oc-l1{
+  display:flex;
   font-family:'Noto Serif JP',serif;font-size:4vw;
-  color:rgba(200,168,80,0.95);letter-spacing:.3em;
-  text-shadow:0 0 20px rgba(200,168,48,0.5);
+  letter-spacing:.3em;
   margin-bottom:2vh;
+  white-space:pre;
 }
+#opening-card .oc-l1 span{
+  display:inline-block;
+  opacity:0;
+  transform:translateX(-22px);
+  transition:opacity 1.1s cubic-bezier(.19,1,.22,1), transform 1.1s cubic-bezier(.19,1,.22,1);
+  color:rgba(200,168,80,0.95);
+  text-shadow:0 0 20px rgba(200,168,48,0.5);
+}
+#opening-card .oc-l1 span.on{opacity:1;transform:translateX(0);}
 #opening-card .oc-l2{
   font-family:'Noto Serif JP',serif;font-size:1.8vw;
   color:rgba(200,168,80,0.6);letter-spacing:.2em;
+  opacity:0;
+  transition:opacity 1s linear;
 }
+#opening-card .oc-l2.on{opacity:1;}
 .title-btn{
   width:100%;background:rgba(14,10,24,0.9);
   border:1px solid rgba(200,168,80,0.5);
@@ -461,8 +471,8 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
   </div>
   <div id="opening-card">
     <div id="opening-text">
-      <div class="oc-l1">NTSN DAYS</div>
-      <div class="oc-l2">― Close Range ―</div>
+      <div class="oc-l1" id="oc-l1"></div>
+      <div class="oc-l2" id="oc-l2">― Close Range ―</div>
     </div>
   </div>
   <div id="title-screen">
@@ -1533,23 +1543,39 @@ function hideTitleScreen(){
 
 function showOpeningCard(callback){
   var el=document.getElementById("opening-card");
-  var txt=document.getElementById("opening-text");
+  var l1=document.getElementById("oc-l1");
+  var l2=document.getElementById("oc-l2");
   blockTap=true;
-  txt.classList.remove("on");
+
+  var WORD="NTSN DAYS";
+  l1.innerHTML=WORD.split("").map(function(ch){return "<span>"+(ch===" "?"&nbsp;":ch)+"</span>";}).join("");
+  var letters=l1.querySelectorAll("span");
+  letters.forEach(function(sp){sp.classList.remove("on");});
+  l2.classList.remove("on");
+
   el.classList.add("show"); // 背景は即座に不透明で覆う（夜の海が見えないように）
+
+  var STAGGER=110, LETTER_DUR=1100;
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
-      txt.classList.add("on");
+      letters.forEach(function(sp,i){
+        setTimeout(function(){ sp.classList.add("on"); }, i*STAGGER);
+      });
+      var lastSettle=(letters.length-1)*STAGGER+LETTER_DUR;
+      setTimeout(function(){ l2.classList.add("on"); }, lastSettle+400);
+
+      var HOLD=1500;
+      setTimeout(function(){
+        letters.forEach(function(sp){sp.classList.remove("on");});
+        l2.classList.remove("on");
+        setTimeout(function(){
+          el.classList.remove("show");
+          blockTap=false;
+          callback();
+        },800);
+      }, lastSettle+400+1000+HOLD);
     });
   });
-  setTimeout(function(){
-    txt.classList.remove("on");
-    setTimeout(function(){
-      el.classList.remove("show");
-      blockTap=false;
-      callback();
-    },800);
-  },800+1500);
 }
 
 function startChapter(chapterKey){
