@@ -1630,6 +1630,7 @@ function startChapter(chapterKey){
   function openChapterMenu(e){
     if(e.preventDefault)e.preventDefault();
     e.stopPropagation();
+    document.getElementById("title-screen").classList.add("hide");
     document.getElementById("chapter-screen").classList.add("show");
   }
   if(chapterMenuBtn){
@@ -1642,6 +1643,7 @@ function startChapter(chapterKey){
     if(e.preventDefault)e.preventDefault();
     e.stopPropagation();
     document.getElementById("chapter-screen").classList.remove("show");
+    document.getElementById("title-screen").classList.remove("hide");
   }
   if(backBtn){
     backBtn.addEventListener("touchend",closeChapterMenu,{passive:false});
