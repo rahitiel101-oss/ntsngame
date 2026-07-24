@@ -621,7 +621,16 @@ var _bangFiredAt=-1;
 var _bangHideTimer=null;
 var currentSC=SC; // 現在のシナリオ配列（選択肢で切り替わる）
 
-function resize(){cc.width=vn.offsetWidth;cc.height=vn.offsetHeight;layoutDialog();drawChars(step);}
+function resize(){
+  var dpr=window.devicePixelRatio||1;
+  var cw=vn.offsetWidth,ch=vn.offsetHeight;
+  cc.width=Math.round(cw*dpr);
+  cc.height=Math.round(ch*dpr);
+  cc.style.width=cw+"px";
+  cc.style.height=ch+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  layoutDialog();drawChars(step);
+}
 function layoutDialog(){var ntH=nt.classList.contains("h")?0:nt.offsetHeight;di.style.top=ntH+"px";}
 function getSceneTitleBottom(){if(sc.classList.contains("h"))return vn.offsetHeight*0.08;var r1=sc.getBoundingClientRect(),r2=vn.getBoundingClientRect();return(r1.bottom-r2.top)+8;}
 function getDialogTop(){var r1=db.getBoundingClientRect(),r2=vn.getBoundingClientRect();return r1.top-r2.top;}
@@ -655,7 +664,8 @@ function setBg(scene){
 }
 
 function drawChars(i){
-  var s=currentSC[i],w=cc.width,h=cc.height;
+  var dpr=window.devicePixelRatio||1;
+  var s=currentSC[i],w=cc.width/dpr,h=cc.height/dpr;
   ctx.clearRect(0,0,w,h);
   hideElectric();
   if(!s||s.search||s.choice)return;
@@ -724,15 +734,18 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   var baseAlpha=(charId && charId===_fadeChar) ? 0.95 : (active?0.95:0.35);
   ctx.globalAlpha=baseAlpha*fadeFactor;
   var imgAspect=img.naturalWidth/img.naturalHeight;
-  // 画面高さの80%を基準にする（スマホで大きく表示される）
-  var drawH=h*0.80;
+  // 画面高さの74%を基準にする（スマホで大きく表示される）
+  var drawH=h*0.74;
   var drawW=drawH*imgAspect;
   // 幅が画面の60%超えたらクランプ
   if(drawW>w*0.60){drawW=w*0.60;drawH=drawW/imgAspect;}
   var drawX=cx-drawW/2;
-  // 下端をdialogTopより35%沈める（腰〜太ももがウィンドウに隠れる）
-  var sink=drawH*0.35;
+  // 下端をdialogTopより42%沈める（腰〜太ももがウィンドウに隠れる）
+  var sink=drawH*0.42;
   var drawY=dialogTop-drawH+sink;
+  // 頭が画面上端で見切れないように最低限のマージンを確保
+  var minY=h*0.03;
+  if(drawY<minY) drawY=minY;
   ctx.drawImage(img,drawX,drawY,drawW,drawH);
   ctx.restore();
   // イマジナリー夏生の場合はもやエフェクトを表示
