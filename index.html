@@ -614,7 +614,7 @@ var searchHint=document.getElementById("search-hint"),rpl=document.getElementByI
 var searchSplash=document.getElementById("search-splash");
 var sdlg=document.getElementById("sdlg"),sdlgT=document.getElementById("sdlg-text"),sdlgX=document.getElementById("sdlg-x"),nSBtn=document.getElementById("next-search-btn");
 var choiceWrap=document.getElementById("choice-wrap");
-var step=0,typing=false,tid=null,curScene="",searchMode=false,sdlgOpen=false,searchFound={},tapX=0,tapY=0,blockTap=false;
+var step=0,typing=false,tid=null,curScene="",searchMode=false,sdlgOpen=false,searchFound={},tapX=0,tapY=0,blockTap=false,chapterJumpActive=false;
 var histLog=[];
 var _bangFiredAt=-1;
 var _bangHideTimer=null;
@@ -1113,7 +1113,8 @@ function show(i){
     },700);
     return;
   }
-  var prevIsSpecial = (prev==="search"||prev==="search_container"||prev==="black"||prev==="smartphone");
+  var prevIsSpecial = (prev==="search"||prev==="search_container"||prev==="black"||prev==="smartphone") && !chapterJumpActive;
+  chapterJumpActive=false;
   var toSmartphone = (s.scene==="smartphone"||s.fullscreen);
   var isEffect = !!(s.bang||s.shakebig||s.shakeend||s.shakesmall);
   var noIntro = !!(s.sceneChangeNoIntro);
@@ -1585,7 +1586,7 @@ function startChapter(chapterKey){
   if(chapterKey==="start"){ showOpeningCard(function(){ show(0); }); return; }
   if(chapterKey==="workshop"){
     for(var i=0;i<SC.length;i++){
-      if(SC[i].blackout&&SC[i].nextTitle&&SC[i].nextTitle.indexOf("工房")>=0){step=i+1;show(step);return;}
+      if(SC[i].blackout&&SC[i].nextTitle&&SC[i].nextTitle.indexOf("工房")>=0){step=i+1;chapterJumpActive=true;show(step);return;}
     }
     show(0);return;
   }
@@ -1607,13 +1608,13 @@ function startChapter(chapterKey){
   }
   if(chapterKey==="last_battle"){
     var resLB=findTitleInBranch(SC,"Last Battle");
-    if(resLB){currentSC=resLB.sc;step=resLB.idx;show(step);}else show(0);
+    if(resLB){currentSC=resLB.sc;step=resLB.idx;chapterJumpActive=true;show(step);}else show(0);
     return;
   }
   var targets={"warehouse_front":"warehouse_front","warehouse_inside":"warehouse_inside","in_the_box":"in_the_box","ship_hold":"ship_hold","ship_hold2":"ship_hold2"};
   if(targets[chapterKey]){
     var res=findSceneInBranch(SC,targets[chapterKey]);
-    if(res){currentSC=res.sc;step=res.idx;show(step);}else show(0);
+    if(res){currentSC=res.sc;step=res.idx;chapterJumpActive=true;show(step);}else show(0);
     return;
   }
   show(0);
