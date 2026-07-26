@@ -806,9 +806,10 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   var isImaginaryChar=arguments[7];
   var isGhost=arguments[9];
   var forceAlpha=arguments[10];
-  var baseAlpha=forceAlpha!==undefined ? forceAlpha : (isGhost ? 0.95 : ((charId && charId===_fadeChar) ? 0.95 : (isImaginaryChar ? 0.95 : (active?0.95:0.35))));
+  var baseAlpha=forceAlpha!==undefined ? forceAlpha : (isGhost ? 0.95 : ((charId && charId===_fadeChar) ? 0.95 : (isImaginaryChar ? 0.95 : 0.95)));
   ctx.globalAlpha=baseAlpha*fadeFactor;
   if(isGhost){ ctx.filter="grayscale(100%)"; }
+  else if(!active && !isImaginaryChar && !(charId && charId===_fadeChar)){ ctx.filter="brightness(55%)"; }
   var imgAspect=img.naturalWidth/img.naturalHeight;
   // 画面高さの80%を基準にする（スマホで大きく表示される）
   var drawH=h*0.80;
