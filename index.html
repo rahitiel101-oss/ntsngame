@@ -179,10 +179,10 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 }
 #credits-block .cr-head:first-child{margin-top:0;}
 #credits-block .cr-body{
-  font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:500;
+  font-family:'Cormorant Garamond','Noto Serif JP',serif;font-weight:600;
   font-size:clamp(1.05rem,2.4vw,1.55rem);
   letter-spacing:.3em;
-  color:var(--e-title1,#5c7a8c);
+  color:var(--e-name,#2c4a58);
   line-height:2;
   margin-top:.55vh;
   text-shadow:0 0 1px var(--e-shadow1,rgba(50,90,110,.5)),0 1px 2px var(--e-shadow2,rgba(40,80,100,.3));
@@ -213,7 +213,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 #chapter-screen{
   position:absolute;inset:0;
   background:linear-gradient(to bottom right, rgba(8,6,15,0.45), rgba(8,6,15,0.8));
-  display:none;flex-direction:column;align-items:center;justify-content:flex-start;
+  display:none;flex-direction:column;align-items:center;justify-content:safe center;
   z-index:30;overflow-y:auto;
   padding:4vh 0 4vh;
 }
@@ -975,8 +975,8 @@ function typeText(text){
 
 /* エンディング演出 */
 var ENDING_THEMES = {
-  blue: {bg1:"#FFFFFF",bg2:"#F2FAFF",bg3:"#DDF4FF",txt:"#EAF6FF",glow:"rgba(174,235,255,1)",glow2:"rgba(174,235,255,.6)",shadow1:"rgba(50,90,110,.75)",shadow2:"rgba(40,80,100,.55)",vig:"rgba(90,130,150,0.14)",vig2:"rgba(90,130,150,0.05)",title1:"#5c7a8c",title2:"#7d97a6"},
-  gold: {bg1:"#FFFDF7",bg2:"#FFF7DD",bg3:"#F8E6A3",txt:"#FFF9E8",glow:"rgba(255,231,154,1)",glow2:"rgba(255,231,154,.6)",shadow1:"rgba(120,95,40,.75)",shadow2:"rgba(110,85,35,.55)",vig:"rgba(150,120,55,0.14)",vig2:"rgba(150,120,55,0.05)",title1:"#8a7a4a",title2:"#a3924f"}
+  blue: {bg1:"#FFFFFF",bg2:"#F2FAFF",bg3:"#DDF4FF",txt:"#EAF6FF",glow:"rgba(174,235,255,1)",glow2:"rgba(174,235,255,.6)",shadow1:"rgba(50,90,110,.75)",shadow2:"rgba(40,80,100,.55)",vig:"rgba(90,130,150,0.14)",vig2:"rgba(90,130,150,0.05)",title1:"#5c7a8c",title2:"#7d97a6",name1:"#2c4a58"},
+  gold: {bg1:"#FFFDF7",bg2:"#FFF7DD",bg3:"#F8E6A3",txt:"#FFF9E8",glow:"rgba(255,231,154,1)",glow2:"rgba(255,231,154,.6)",shadow1:"rgba(120,95,40,.75)",shadow2:"rgba(110,85,35,.55)",vig:"rgba(150,120,55,0.14)",vig2:"rgba(150,120,55,0.05)",title1:"#8a7a4a",title2:"#a3924f",name1:"#5e451c"}
 };
 
 function showEnding(s){
@@ -1004,6 +1004,7 @@ function showEnding(s){
   el.style.setProperty("--e-vig2", theme.vig2);
   el.style.setProperty("--e-title1", theme.title1);
   el.style.setProperty("--e-title2", theme.title2);
+  el.style.setProperty("--e-name", theme.name1);
 
   var WORD = (s.text || "HAPPY END").split("\n")[0];
   heEl.innerHTML = WORD.split("").map(function(ch){return "<span>"+(ch===" "?"&nbsp;":ch)+"</span>";}).join("");
