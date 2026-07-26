@@ -718,6 +718,7 @@ function drawChars(i){
   }
   if(!s.chars||!s.chars.length)return;
   var dialogTop=getDialogTop(),titleBottom=getSceneTitleBottom();
+  var shownIds={};
   for(var j=0;j<s.chars.length;j++){
     var id=s.chars[j];
     var speakers=s.speaker?s.speaker.split("・"):[];
@@ -727,10 +728,14 @@ function drawChars(i){
       var isImaginary=(s.imaginary===true);
       var natsukiImg=(s.natsukiVariant && NATSUKI_VARIANTS[s.natsukiVariant]) ? NATSUKI_VARIANTS[s.natsukiVariant] : ((s.scene==="principal"||s.scene==="workshop") ? NATSUKI_IMG_WORK : NATSUKI_IMG);
       rect=drawCharImg(natsukiImg, dialogTop, titleBottom, w, h, active, w*0.32, isImaginary, "natsuki");
+      _lastNatsukiImg=natsukiImg;
+      shownIds.natsuki=true;
     } else if(id==="shin"){
       hideMoya();
       var shinImg=(s.shinVariant && SHIN_VARIANTS[s.shinVariant]) ? SHIN_VARIANTS[s.shinVariant] : SHIN_IMG;
       rect=drawCharImg(shinImg, dialogTop, titleBottom, w, h, active, w*0.68, false, "shin");
+      _lastShinImg=shinImg;
+      shownIds.shin=true;
     } else {
       hideMoya();
       drawSil(w/2,dialogTop,titleBottom,w,h,active);
@@ -740,9 +745,18 @@ function drawChars(i){
       showElectric(rect.x, rect.y, rect.w, rect.h);
     }
   }
+  // 話者ではない方も、直前まで表示していた立ち絵をグレーアウトして表示する
+  if(!shownIds.natsuki && _lastNatsukiImg){
+    drawCharImg(_lastNatsukiImg, dialogTop, titleBottom, w, h, false, w*0.32, false, "natsuki", true);
+  }
+  if(!shownIds.shin && _lastShinImg){
+    hideMoya();
+    drawCharImg(_lastShinImg, dialogTop, titleBottom, w, h, false, w*0.68, false, "shin", true);
+  }
 }
 
 var _imgCache={};
+var _lastNatsukiImg=null,_lastShinImg=null;
 var _fadeChar=null,_fadeStart=0,_fadeDuration=900;
 function startFadeIn(id){
   _fadeChar=id;
@@ -777,8 +791,10 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   }
   ctx.save();
   var isImaginaryChar=arguments[7];
-  var baseAlpha=(charId && charId===_fadeChar) ? 0.95 : (isImaginaryChar ? 0.95 : (active?0.95:0.35));
+  var isGhost=arguments[9];
+  var baseAlpha=isGhost ? 0.55 : ((charId && charId===_fadeChar) ? 0.95 : (isImaginaryChar ? 0.95 : (active?0.95:0.35)));
   ctx.globalAlpha=baseAlpha*fadeFactor;
+  if(isGhost){ ctx.filter="grayscale(100%)"; }
   var imgAspect=img.naturalWidth/img.naturalHeight;
   // 画面高さの80%を基準にする（スマホで大きく表示される）
   var drawH=h*0.80;
@@ -1644,6 +1660,7 @@ function startChapter(chapterKey){
   hideTitleScreen();
   histLog=[];currentSC=SC;step=0;_bangFiredAt=-1;stopShake();
   curScene=""; // 背景キャッシュをリセット（チャプター選択で背景が切り替わらないバグ対策）
+  _lastNatsukiImg=null;_lastShinImg=null; // グレーアウト用の記憶もリセット
   if(chapterKey==="start"){ showOpeningCard(function(){ show(0); }); return; }
   if(chapterKey==="workshop"){
     for(var i=0;i<SC.length;i++){
