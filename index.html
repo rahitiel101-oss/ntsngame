@@ -797,9 +797,10 @@ function drawChars(i){
       _lastNatsukiImg=natsukiImg;
       shownIds.natsuki=true;
     } else if(id==="shin"){
-      hideMoya();
+      var isImaginaryShin=(s.imaginary===true);
+      if(!isImaginaryShin) hideMoya();
       var shinImg=(s.shinVariant && SHIN_VARIANTS[s.shinVariant]) ? SHIN_VARIANTS[s.shinVariant] : SHIN_IMG;
-      rect=drawCharImg(shinImg, dialogTop, titleBottom, w, h, active, w*0.68, false, "shin");
+      rect=drawCharImg(shinImg, dialogTop, titleBottom, w, h, active, w*0.68, isImaginaryShin, "shin");
       _lastShinImg=shinImg;
       shownIds.shin=true;
     } else {
