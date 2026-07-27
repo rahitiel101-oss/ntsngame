@@ -340,8 +340,19 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
   display:none;
   align-items:center;justify-content:center;
   padding:6vh 8vw;
-  pointer-events:none;
+  pointer-events:auto;
+  cursor:pointer;
 }
+#disclaimer-card .dc-hint{
+  position:absolute;bottom:4vh;left:0;right:0;
+  text-align:center;
+  font-family:'Noto Serif JP',serif;font-size:clamp(.65rem,1.3vw,.85rem);
+  color:rgba(200,168,80,0.55);
+  letter-spacing:.15em;
+  opacity:0;
+  transition:opacity 1s ease;
+}
+#disclaimer-card.on .dc-hint{opacity:1;}
 #disclaimer-card.show{display:flex;}
 #disclaimer-card .dc-inner{
   opacity:0;
@@ -510,6 +521,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
       <div class="dc-line">・本ゲームは個人制作の二次創作ゲームです。<br>原作者様・出版社様・その他関係者様とは一切関係ありません</div>
       <div class="dc-line">・制作に使用した全ての生成AIは企業で契約している課金アカウントであり、学習には使用しておりません</div>
     </div>
+    <div class="dc-hint">タップして次へ</div>
   </div>
   <div id="opening-card">
     <div id="opening-text">
@@ -561,25 +573,25 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
         <feTurbulence type="fractalNoise" baseFrequency="0.018 0.022" numOctaves="4" seed="3" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="28" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
         <feGaussianBlur in="displaced" stdDeviation="8" result="blurred"/>
-        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.28 0"/>
+        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.62 0"/>
       </filter>
       <filter id="f-moya2" x="-40%" y="-40%" width="180%" height="180%">
         <feTurbulence type="fractalNoise" baseFrequency="0.025 0.015" numOctaves="3" seed="9" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="G" yChannelSelector="R" result="displaced"/>
         <feGaussianBlur in="displaced" stdDeviation="12" result="blurred"/>
-        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.18 0"/>
+        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.5 0"/>
       </filter>
       <filter id="f-moya3" x="-50%" y="-50%" width="200%" height="200%">
         <feTurbulence type="fractalNoise" baseFrequency="0.012 0.030" numOctaves="5" seed="17" result="noise"/>
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="B" result="displaced"/>
         <feGaussianBlur in="displaced" stdDeviation="16" result="blurred"/>
-        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.12 0"/>
+        <feColorMatrix in="blurred" type="matrix" values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0.4 0"/>
       </filter>
     </defs>
     <!-- もや層（JS側でcx/cy/rxなどを動的に設定） -->
-    <ellipse id="moya-e3" fill="white" filter="url(#f-moya3)" opacity="0.42"/>
-    <ellipse id="moya-e2" fill="white" filter="url(#f-moya2)" opacity="0.38"/>
-    <ellipse id="moya-e1" fill="white" filter="url(#f-moya1)" opacity="0.34"/>
+    <ellipse id="moya-e3" fill="white" filter="url(#f-moya3)" opacity="0.7"/>
+    <ellipse id="moya-e2" fill="white" filter="url(#f-moya2)" opacity="0.65"/>
+    <ellipse id="moya-e1" fill="white" filter="url(#f-moya1)" opacity="0.6"/>
   </svg>
   <svg id="electric-svg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;z-index:1;overflow:visible;" xmlns="http://www.w3.org/2000/svg"></svg>
   <div id="sc" class="h"></div>
@@ -849,8 +861,10 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   var isGhost=arguments[9];
   var forceAlpha=arguments[10];
   var baseAlpha=forceAlpha!==undefined ? forceAlpha : 0.95;
+  if(isImaginaryChar) baseAlpha=Math.min(baseAlpha,0.8);
   ctx.globalAlpha=baseAlpha*fadeFactor;
   if(isGhost){ ctx.filter="brightness(55%)"; }
+  else if(isImaginaryChar){ ctx.filter="blur(2px) brightness(112%) saturate(70%)"; }
   else if(!active && !isImaginaryChar && !(charId && charId===_fadeChar)){ ctx.filter="brightness(55%)"; }
   var imgAspect=img.naturalWidth/img.naturalHeight;
   // 画面高さの80%を基準にする（スマホで大きく表示される）
@@ -1682,16 +1696,29 @@ function showDisclaimerCard(callback){
   blockTap=true;
   el.classList.remove("on");
   el.classList.add("show");
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){ el.classList.add("on"); });
-  });
-  setTimeout(function(){
+  var advanced=false;
+  function advance(e){
+    if(e){ e.stopPropagation(); e.preventDefault(); }
+    if(advanced) return;
+    advanced=true;
+    el.removeEventListener("click",advance);
+    el.removeEventListener("touchend",advance);
     el.classList.remove("on");
     setTimeout(function(){
       el.classList.remove("show");
       callback();
     }, 500);
-  }, 3000);
+  }
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      el.classList.add("on");
+      // フェードインが終わってから少し待ってタップを受け付ける（誤タップ防止）
+      setTimeout(function(){
+        el.addEventListener("click",advance);
+        el.addEventListener("touchend",advance,{passive:false});
+      }, 500);
+    });
+  });
 }
 function showOpeningCard(callback){
   var el=document.getElementById("opening-card");
