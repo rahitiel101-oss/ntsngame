@@ -126,6 +126,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 #ending-screen{
   position:absolute;inset:0;z-index:40;
   opacity:0;pointer-events:none;
+  background:#000;
   transition:opacity 1.2s cubic-bezier(.33,0,.2,1);
   display:flex;align-items:center;justify-content:center;flex-direction:column;
   overflow:hidden;
@@ -134,7 +135,8 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
 #ending-screen.breathing{animation:endingBreathe 7s ease-in-out infinite;}
 @keyframes endingBreathe{0%,100%{filter:brightness(1);}50%{filter:brightness(1.018);}}
 #ending-cg-img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 28%;
+  position:absolute;left:50%;top:0;transform:translateX(-50%);
+  width:84%;height:100%;object-fit:contain;object-position:center;
   opacity:0;display:none;transition:opacity 1.3s ease;
 }
 #ending-cg-img.show{display:block;}
@@ -143,7 +145,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
   background:linear-gradient(165deg, var(--e-bg1,#fff) 0%, var(--e-bg2,#f2faff) 52%, var(--e-bg3,#ddf4ff) 100%);
   opacity:0;transition:opacity 1.4s ease;
 }
-#ending-tint.show{opacity:0.87;}
+#ending-tint.show{opacity:0.68;}
 #ending-vignette{
   position:absolute;left:50%;top:50%;width:70vw;height:34vh;
   transform:translate(-50%,-50%);
@@ -1169,7 +1171,7 @@ function showEnding(s){
   requestAnimationFrame(function(){
     vig.classList.add("show");
     tint.classList.add("show");
-    cgImg.style.opacity="0.24";
+    cgImg.style.opacity="0.46";
   });
 
   var FADE=1200, PAUSE=500, STAGGER=170, LETTER_DUR=1300;
