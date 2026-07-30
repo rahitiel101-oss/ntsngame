@@ -584,7 +584,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
       <button class="title-btn" id="btn-chapter-menu">チャプター選択</button>
       <button class="title-btn" id="btn-notes-menu">Notes</button>
     </div>
-    <div id="app-version">ver1.3</div>
+    <div id="app-version">ver1.4</div>
   </div>
   <div id="notes-screen">
     <div class="notes-inner">
@@ -1308,8 +1308,10 @@ function showEnding(s){
       creditsEl.classList.remove("show","dissolving");
       creditsEl.innerHTML="";
       creditsEl.classList.remove("compact","thanks");
-      // 白がかったCGだけが残った状態を少し見せてからトップへ
-      setTimeout(onPage3End, 1400);
+      // 白いもやをじわりと晴らし、CGを見やすくする（完全にはクリアにせず、幻想的な白みを残す）
+      tint.style.opacity="0.34";
+      cgImg.style.opacity="0.78";
+      setTimeout(onPage3End, 3400);
     }, 4200);
   }
   function onPage3End(e){
