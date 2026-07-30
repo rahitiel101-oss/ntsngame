@@ -584,7 +584,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
       <button class="title-btn" id="btn-chapter-menu">チャプター選択</button>
       <button class="title-btn" id="btn-notes-menu">Notes</button>
     </div>
-    <div id="app-version">ver1.9</div>
+    <div id="app-version">ver1.10</div>
   </div>
   <div id="notes-screen">
     <div class="notes-inner">
@@ -956,7 +956,7 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
     // source-atop（キャラの不透明ピクセルにのみ重なる）でグレーを薄く重ねて彩度を少し落とす
     ctx.globalAlpha=1*fadeFactor;
     ctx.globalCompositeOperation="source-atop";
-    ctx.fillStyle="rgba(30,30,34,0.5)";
+    ctx.fillStyle="rgba(55,55,60,0.42)";
     ctx.fillRect(drawX,drawY,drawW,drawH);
   }
   ctx.restore();
