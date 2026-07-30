@@ -584,7 +584,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:ma
       <button class="title-btn" id="btn-chapter-menu">チャプター選択</button>
       <button class="title-btn" id="btn-notes-menu">Notes</button>
     </div>
-    <div id="app-version">ver1.11</div>
+    <div id="app-version">ver1.13</div>
   </div>
   <div id="notes-screen">
     <div class="notes-inner">
@@ -949,23 +949,8 @@ function drawCharImg(imgUrl, dialogTop, titleBottom, w, h, active, cx){
   // 頭が画面上端で見切れないように最低限のマージンを確保
   var minY=h*0.03;
   if(drawY<minY) drawY=minY;
-  if(isImaginaryChar){
-    // filter非対応環境でも確実に効くよう、少しずらして重ね描きすることでぼかしを近似する
-    var _blurOffsets=[[-2.4,0],[2.4,0],[0,-2.4],[0,2.4],[-1.6,-1.6],[1.6,1.6],[0,0]];
-    var _blurAlpha=(baseAlpha*fadeFactor)/_blurOffsets.length*2.1;
-    ctx.globalAlpha=Math.min(_blurAlpha,0.5);
-    for(var _bi=0;_bi<_blurOffsets.length;_bi++){
-      ctx.drawImage(img,drawX+_blurOffsets[_bi][0],drawY+_blurOffsets[_bi][1],drawW,drawH);
-    }
-    // 明るさを少し上げる（白を薄く重ねる）
-    ctx.globalAlpha=1*fadeFactor;
-    ctx.globalCompositeOperation="source-atop";
-    ctx.fillStyle="rgba(255,255,255,0.14)";
-    ctx.fillRect(drawX,drawY,drawW,drawH);
-    ctx.globalCompositeOperation="source-over";
-  } else {
-    ctx.drawImage(img,drawX,drawY,drawW,drawH);
-  }
+  if(isImaginaryChar){ ctx.filter="blur(1.8px) brightness(108%) saturate(80%)"; }
+  ctx.drawImage(img,drawX,drawY,drawW,drawH);
   if(isDimmed){
     // filter非対応環境でも確実に効く方法：不透明度は落とさず、
     // source-atop（キャラの不透明ピクセルにのみ重なる）でグレーを薄く重ねて彩度を少し落とす
